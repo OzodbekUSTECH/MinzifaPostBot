@@ -79,7 +79,7 @@ async def handle_media_post(message: Message, state: FSMContext) -> None:
 
     if content:
         await state.set_state(CreatePostForm.caption)
-        await message.answer("Введите заголовок для вашего поста:", reply_markup=get_cancel_rkb_button())
+        await message.answer("Введите текст для вашего поста:", reply_markup=get_cancel_rkb_button())
     else:
         await message.answer("Пожалуйста, отправьте <b>фото, видео или гиф</b>, чтобы продолжить.")
 
