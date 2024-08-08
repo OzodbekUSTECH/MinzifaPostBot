@@ -7,6 +7,7 @@ from aiogram.enums import ParseMode
 class Settings(BaseSettings):
     CHANNEL_ID: str
     TOKEN: str
+    USERNAMES: list
 
     model_config = SettingsConfigDict(env_file=".env")
 
