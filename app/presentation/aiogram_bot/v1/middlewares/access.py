@@ -15,6 +15,6 @@ class AccessMiddleware(BaseMiddleware):
         current_username = event.from_user.username
 
         if current_username not in self.allowed_usernames:
-            return
+            return await event.answer("Вас нет в списке пользователей. Вы не можете пользоваться ботом!")
 
         return await handler(event, data)
