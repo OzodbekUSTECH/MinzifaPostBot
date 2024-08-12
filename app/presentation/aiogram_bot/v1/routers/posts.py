@@ -12,6 +12,7 @@ from app.presentation.aiogram_bot.v1.keyboards.posts import (
 from app.presentation.aiogram_bot.v1.keyboards.start import get_start_rkb_buttons
 from app.infrastructure.config import bot, settings
 from app.presentation.aiogram_bot.v1.enums import ButtonNames
+from aiogram.exceptions import TelegramBadRequest
 
 router = Router()
 
@@ -153,14 +154,24 @@ async def handle_sizes(message: Message, state: FSMContext) -> None:
         content = data.get('content', '')
         caption = data.get('caption', '')
 
-        if post_type == "text":
-            await message.answer(text=caption, reply_markup=builder.as_markup())
-        elif post_type == "photo":
-            await message.answer_photo(photo=content, caption=caption, reply_markup=builder.as_markup())
-        elif post_type == "video":
-            await message.answer_video(video=content, caption=caption, reply_markup=builder.as_markup())
-        elif post_type == "gif":
-            await message.answer_animation(animation=content, caption=caption, reply_markup=builder.as_markup())
+        try:
+            if post_type == "text":
+                await message.answer(text=caption, reply_markup=builder.as_markup())
+            elif post_type == "photo":
+                await message.answer_photo(photo=content, caption=caption, reply_markup=builder.as_markup())
+            elif post_type == "video":
+                await message.answer_video(video=content, caption=caption, reply_markup=builder.as_markup())
+            elif post_type == "gif":
+                await message.answer_animation(animation=content, caption=caption, reply_markup=builder.as_markup())
+        except TelegramBadRequest as e:
+            if "message caption is too long" in str(e):
+                await message.answer(
+                    "Ошибка: текст к сообщению слишком длинный. Пожалуйста, сократите текст и попробуйте снова."
+                )
+                await state.set_state(CreatePostForm.caption)
+                await message.answer("Введите сокращенный текст для вашего поста:",
+                                     reply_markup=get_cancel_rkb_button())
+                return
 
         await state.set_state(CreatePostForm.confirm)
         await message.answer("Отлично! Теперь вы можете переслать пост на канал или нажать 'Готово'.",
